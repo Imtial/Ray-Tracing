@@ -6,6 +6,11 @@ Shape::Shape()
 
 }
 
+char* Shape::type()
+{
+    return (char*) "Shape\n";
+}
+
 void Shape::setColor(double r, double g, double b)
 {
     color[0] = r;
@@ -47,6 +52,7 @@ void Shape::printShine()
 
 void Shape::print(int precision)
 {
+    printf("%s", type());
     printf("Reference Point = ");
     reference_point.print(precision);
     printf("height = %0.*lf, width = %0.*lf, length = %0.*lf\n", precision, height, precision, width, precision, length);

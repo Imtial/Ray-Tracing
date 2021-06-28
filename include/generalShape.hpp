@@ -3,13 +3,15 @@
 
 #include "shape.hpp"
 
-class GeneralShape : protected Shape
+class GeneralShape : public Shape
 {
     private:
         double surfaceCoeffs[10];
     public:
         GeneralShape(double a, double b, double c, double d, double e,
-                    double f, double g, double h, double i, double j);
+                    double f, double g, double h, double i, double j,
+                    Vector3D& cube_ref_point, double length, double width, double height);
+        char* type();
         void draw();
         void setSurfaceCoeffs(double a, double b, double c, double d, double e,
                             double f, double g, double h, double i, double j);
@@ -18,7 +20,7 @@ class GeneralShape : protected Shape
         void setSurfaceCoeff(double coeff, char coeffLabel);
         double getSurfaceCoeff(int index);
         double getSurfaceCoeff(char coeffLabel);
-        void print(int precision);
+        void print(int precision = 2);
         ~GeneralShape();
 };
 

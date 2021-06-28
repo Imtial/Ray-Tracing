@@ -7,6 +7,11 @@ Sphere::Sphere(Vector3D &center, double radius)
     length = radius;
 }
 
+char* Sphere::type()
+{
+    return (char*) "Sphere\n";
+}
+
 void Sphere::draw()
 {
     printf("Sphere::draw() yet to be implemented");
@@ -34,12 +39,14 @@ Vector3D& Sphere::getCenter()
 
 void Sphere::print(int precision)
 {
+    printf("%s", type());
     printf("center = ");
     reference_point.print(precision);
     printf("radius = %0.*lf\n", precision, length);
     printColor(precision);
     printCoeffs(precision);
     printShine();
+    printf("\n");
 }
 
 Sphere::~Sphere()

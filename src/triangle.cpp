@@ -19,6 +19,11 @@ Triangle::Triangle(Vector3D& p1, Vector3D& p2, Vector3D& p3)
 
 }
 
+char* Triangle::type()
+{
+    return (char*) "Triangle\n";
+}
+
 void Triangle::draw()
 {
     printf("Triangle::draw() is yet to be implemented\n");
@@ -63,12 +68,14 @@ Vector3D& Triangle::getPoint(int i)
 
 void Triangle::print(int precision)
 {
+    printf("%s", type());
     printf("p1 = "); points[0].print(precision);
     printf("p2 = "); points[1].print(precision);
     printf("p3 = "); points[2].print(precision);
     printColor(precision);
     printCoeffs(precision);
     printShine();
+    printf("\n");
 }
 
 Triangle::~Triangle()

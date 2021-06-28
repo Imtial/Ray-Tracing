@@ -18,12 +18,13 @@ class Shape
         int shine; // exponent term of specular component
         
         Shape();
+        virtual char* type();
         virtual void draw() = 0;
         void setColor(double r, double g, double b);
         void setShine(int shine);
         void setCoEfficients(double ambient, double diffuse, double specular, double recursive);
-        virtual void print(int precision);
-        ~Shape();
+        virtual void print(int precision = 2);
+        virtual ~Shape();
 };
 
 #endif

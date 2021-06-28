@@ -1,9 +1,19 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <string>
+#include <vector>
 #include <GL/glut.h>
 #include "vector3D.hpp"
+#include "shape.hpp"
+#include "sphere.hpp"
+#include "triangle.hpp"
+#include "generalShape.hpp"
+#include "light.hpp"
 using namespace std;
+
+typedef vector<Shape*> VS;
+typedef vector<Light*> VL;
 
 #define PI  3.141592653589793
 #define DEG2RAD(a) a * PI / 180.0
@@ -12,7 +22,12 @@ using namespace std;
 float cameraAngle;
 double rot_x, rot_y, rot_z, rot_cyl;
 
+int depth, dim;
 Vector3D pos, l, r, u;
+
+VS shapes;
+VL lights;
+
 
 void drawAxes()
 {
@@ -260,8 +275,15 @@ void display(){
 	glutSwapBuffers();
 }
 
-int depth, dim;
-void loadData(bool print)
+void clearMemory()
+{
+	for (Shape *shape : shapes) delete shape;
+	for (Light *light : lights) delete light;
+	shapes.clear();
+	lights.clear();
+}
+
+void loadData(bool print = false)
 {
 	ifstream fin("scene.txt");
 	fin >> depth >> dim;
@@ -271,13 +293,95 @@ void loadData(bool print)
 
 	for (int i = 0; i < objCount; i++)
 	{
-		
+		string objName;
+		fin >> objName;
+		if (objName == "sphere")
+		{
+			double center1, center2, center3;
+			fin >> center1 >> center2 >> center3;
+			double radius;
+			fin >> radius;
+			double r, g, b;
+			fin >> r >> g >> b;
+			double amb, dif, spec, rec;
+			fin >> amb >> dif >> spec >> rec;
+			int shine;
+			fin >> shine;
+
+			Vector3D center(center1, center2, center3);
+			Shape * sphere = new Sphere(center, radius);
+			sphere->setColor(r, g, b);
+			sphere->setCoEfficients(amb, dif, spec, rec);
+			sphere->setShine(shine);
+
+			shapes.push_back(sphere);
+		}
+		else if (objName == "triangle")
+		{
+			double x1, y1, z1, x2, y2, z2, x3, y3, z3;
+			fin >> x1 >> y1 >> z1 >> x2 >> y2 >> z2 >> x3 >> y3 >> z3;
+			double r, g, b;
+			fin >> r >> g >> b;
+			double amb, dif, spec, rec;
+			fin >> amb >> dif >> spec >> rec;
+			int shine;
+			fin >> shine;
+
+			Shape * triangle = new Triangle(x1,y1,z1,  x2,y2,z2,  x3,y3,z3);
+			triangle->setColor(r, g, b);
+			triangle->setCoEfficients(amb, dif, spec, rec);
+			triangle->setShine(shine);
+
+			shapes.push_back(triangle);
+		}
+		else if (objName == "general")
+		{
+			double a, b, c, d, e, f, g, h, i, j;
+			fin >> a >> b >> c >> d >> e >> f >> g >> h >> i >> j;
+			double x, y, z, length, width, height;
+			fin >> x >> y >> z >> length >> width >> height;
+			double red, green, blue;
+			fin >> red >> green >> blue;
+			double amb, dif, spec, rec;
+			fin >> amb >> dif >> spec >> rec;
+			int shine;
+			fin >> shine;
+
+			Vector3D cube_ref_point(x, y, z);
+			Shape * general = new GeneralShape(a, b, c, d, e, f, g, h, i, j,
+									cube_ref_point, length, width, height);
+			general->setColor(red, green, blue);
+			general->setCoEfficients(amb, dif, spec, rec);
+			general->setShine(shine);
+
+			shapes.push_back(general);
+		}
 	}
+
+	int lightCount;
+	fin >> lightCount;
+
+	for (int i = 0; i < lightCount; i++)
+	{
+		double x, y, z;
+		fin >> x >> y >> z;
+		double r, g, b;
+		fin >> r >> g >> b;
+
+		Light * light = new Light(x, y, z, r, g, b);
+		lights.push_back(light);
+	}
+
+	for (Shape * shape : shapes) shape->print();
+	for (Light * light : lights) light->print();
 	
 	fin.close();
 }
 
 int main(int argc, char **argv){
+
+	loadData();
+
 	glutInit(&argc,argv);
 	glutInitWindowSize(500, 500);
 	glutInitWindowPosition(0, 0);

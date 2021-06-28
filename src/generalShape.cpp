@@ -2,10 +2,19 @@
 #include <cstdio>
 
 GeneralShape::GeneralShape(double a, double b, double c, double d, double e,
-                        double f, double g, double h, double i, double j)
+                        double f, double g, double h, double i, double j,
+                        Vector3D& cube_ref_point, double length, double width, double height)
                         : surfaceCoeffs{a, b, c, d, e, f, g, h, i, j}
 {
+    reference_point = cube_ref_point;
+    this->length = length;
+    this->width = width;
+    this->height = height;
+}
 
+char* GeneralShape::type()
+{
+    return (char*) "General\n";
 }
 
 void GeneralShape::draw()
@@ -63,12 +72,17 @@ double GeneralShape::getSurfaceCoeff(char coeffLabel)
 
 void GeneralShape::print(int precision)
 {
+    printf("%s", type());
     printf("Surface coefficients: ");
     for (int i = 0; i < 10; i++) printf("%0.*lf ", precision, surfaceCoeffs[i]);
     printf("\n");
+    printf("Cubic reference point: ");
+    reference_point.print(precision);
+    printf("length = %0.*lf, width = %0.*lf, height = %0.*lf\n", precision, length, precision, width, precision, height);
     printColor(precision);
     printCoeffs(precision);
     printShine();
+    printf("\n");
 }
 
 
