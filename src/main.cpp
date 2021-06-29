@@ -6,6 +6,7 @@
 #include <GL/glut.h>
 #include "vector3D.hpp"
 #include "shape.hpp"
+#include "floor.hpp"
 #include "sphere.hpp"
 #include "triangle.hpp"
 #include "generalShape.hpp"
@@ -269,7 +270,8 @@ void display(){
 	****************************/
 	//add objects
 	drawAxes();
-	drawGrid();
+	// drawGrid();
+	for (Shape * shape : shapes) shape->draw();
 
 	//ADD this line in the end --- if you use double buffer (i.e. GL_DOUBLE)
 	glutSwapBuffers();
@@ -287,6 +289,9 @@ void loadData(bool print = false)
 {
 	ifstream fin("scene.txt");
 	fin >> depth >> dim;
+
+	Shape * floor = new Floor(1000, 20);
+	shapes.push_back(floor);
 
 	int objCount;
 	fin >> objCount;
@@ -372,8 +377,8 @@ void loadData(bool print = false)
 		lights.push_back(light);
 	}
 
-	for (Shape * shape : shapes) shape->print();
-	for (Light * light : lights) light->print();
+	// for (Shape * shape : shapes) shape->print();
+	// for (Light * light : lights) light->print();
 	
 	fin.close();
 }

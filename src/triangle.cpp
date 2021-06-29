@@ -1,4 +1,5 @@
 #include "triangle.hpp"
+#include <GL/glut.h>
 #include <cstdio>
 
 Triangle::Triangle(double x1, double y1, double z1,
@@ -26,7 +27,13 @@ char* Triangle::type()
 
 void Triangle::draw()
 {
-    printf("Triangle::draw() is yet to be implemented\n");
+    glColor3f(color[0], color[1], color[2]);
+    glBegin(GL_TRIANGLES);
+    {
+        for (int i = 0; i < 3; i++)
+            glVertex3f(points[i].x, points[i].y, points[i].z);
+    }
+    glEnd();
 }
 
 void Triangle::setPoints(double x1, double y1, double z1,
