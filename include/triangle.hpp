@@ -21,6 +21,7 @@ class Triangle : public Shape
         Vector3D (&getPoints())[3];
         void setPoint(Vector3D& p, int i);
         Vector3D& getPoint(int i);
+        double intersect(Ray& ray, double col[], int level);
         void print(int precision = 2);
         ~Triangle();
 };

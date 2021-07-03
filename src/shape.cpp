@@ -1,5 +1,11 @@
 #include "shape.hpp"
+#include "light.hpp"
+#include <vector>
 #include <cstdio>
+#include <cmath>
+
+extern std::vector<Shape*> shapes;
+extern std::vector<Light*> lights;
 
 Shape::Shape()
 {
@@ -31,6 +37,70 @@ void Shape::setCoEfficients(double ambient, double diffuse, double specular, dou
     coEfficients[3] = recursive;
 }
 
+void Shape::illuminate(Ray& ray, double col[], int level, 
+                        Vector3D& intersectionPoint, Vector3D& normalAtIntersection)
+{
+    double pointColor[3];
+    for (int i = 0; i < 3; i++)
+        pointColor[i] = color[i] * coEfficients[0];
+    
+    for (Light * light : lights)
+    {
+        Vector3D lightRayDir = intersectionPoint - light->getPosition();
+        Ray lightRay(light->getPosition(), lightRayDir);
+        double tLight = (intersectionPoint.x - lightRay.getStart().x) / lightRay.getDirection().x;
+        bool isObscured = false;
+        for (Shape * shape : shapes)
+        {
+            double tl = shape->intersect(lightRay, NULL, 0);
+            if (tl > 0 && floor(tl) < floor(tLight))
+            {
+                isObscured = true;
+                break;
+            }
+        }
+        if (!isObscured)
+        {
+            double lambert = normalAtIntersection.dot(lightRay.getDirection());
+            if (lambert < 0) lambert = 0;
+            Vector3D rayR = lightRay.getDirection() - normalAtIntersection * (2 * lambert);
+            double phong = rayR.dot(ray.getDirection());
+            if (phong < 0) phong = 0;
+            for (int i = 0; i < 3; i++)
+                pointColor[i] += light->getColor()[i] * color[i] * coEfficients[1] * lambert
+                                + light->getColor()[i] * coEfficients[2] * pow(phong, shine);
+        }
+    }
+    for (int i = 0; i < 3; i++) 
+        col[i] = pointColor[i];
+
+    if (level < 5)
+    {
+        double lambert = normalAtIntersection.dot(ray.getDirection());
+        Vector3D reflDir = ray.getDirection() - normalAtIntersection * (2 * lambert);
+        Vector3D reflRaySrc = intersectionPoint + reflDir;
+        Ray reflRay(reflRaySrc, reflDir);
+        double tr, tMin = 9999999;
+        Shape * nearest = NULL;
+        for (Shape * shape : shapes)
+        {
+            tr = shape->intersect(reflRay, NULL, 0);
+            if (tr > 0 && tr < tMin)
+            {
+                tMin = tr;
+                nearest = shape;
+            }
+        }
+        if (nearest != NULL)
+        {
+            double reflColor[3];
+            nearest->intersect(reflRay, reflColor, level + 1);
+            for (int i = 0; i < 3; i++)
+                col[i] += reflColor[i] * coEfficients[3];
+        }
+    }
+}
+
 void Shape::printColor(int precision)
 {
     printf("color[r g b]: ");
@@ -48,6 +118,11 @@ void Shape::printCoeffs(int precision)
 void Shape::printShine()
 {
     printf("shine = %d\n", shine);
+}
+
+double Shape::intersect(Ray &ray, double col[], int level)
+{
+    return -1;
 }
 
 void Shape::print(int precision)

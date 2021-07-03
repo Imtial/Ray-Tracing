@@ -12,6 +12,7 @@ class Floor : public Shape
         char* type();
         void setTileWidth(double tileWidth);
         double getTileWidth();
+        double intersect(Ray& ray, double col[], int level);
         void print(int precision);
         ~Floor();
 };

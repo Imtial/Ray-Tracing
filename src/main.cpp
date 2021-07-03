@@ -11,6 +11,7 @@
 #include "triangle.hpp"
 #include "generalShape.hpp"
 #include "light.hpp"
+#include "bitmap_image.hpp"
 using namespace std;
 
 typedef vector<Shape*> VS;
@@ -19,6 +20,10 @@ typedef vector<Light*> VL;
 #define PI  3.141592653589793
 #define DEG2RAD(a) a * PI / 180.0
 #define RAD2DEG(a) a * 180.0 / PI
+
+#define WIN_HEIGHT	500
+#define WIN_WIDTH	500
+#define VIEWANGLE	80
 
 float cameraAngle;
 double rot_x, rot_y, rot_z, rot_cyl;
@@ -66,20 +71,61 @@ void drawGrid()
 			glVertex3f(-90, i*10, 0);
 			glVertex3f( 90, i*10, 0);
 		}
-	} glEnd();
-	
+	} glEnd();	
+}
+
+void capture()
+{
+	double winHeight = WIN_HEIGHT, winWidth = WIN_WIDTH;
+	double imgWidth = dim, imgHeight = dim;
+
+	bitmap_image image(imgWidth, imgHeight);
+
+	double planeDistance = (winHeight / 2.0) / tan( DEG2RAD(VIEWANGLE)/2.0 );
+
+	Vector3D topLeft = pos + l*planeDistance - r*(winWidth / 2) + u*(winHeight / 2);
+
+	double du = winWidth / imgWidth;
+	double dv = winHeight / imgHeight;
+
+	// Choose middle of the grid cell
+	topLeft = topLeft + r*(0.5*du) - u*(0.5*dv);
+
+	for (int i = 0; i < imgWidth; i++)
+	{
+		for (int j = 0; j < imgHeight; j++)
+		{
+			Vector3D curPx = topLeft + r*(du*i) - u*(dv*j);
+			Vector3D rayDir = curPx - pos;
+			Ray ray(pos, rayDir);
+
+			double color[3] = {0, 0, 0};
+			Shape * nearest = NULL;
+			
+			double t, tMin = 9999999;
+			for (Shape * shape : shapes)
+			{
+				t = shape->intersect(ray, color, 0);
+				
+				if (t > 0 && t < tMin)
+				{
+					tMin = t;
+					nearest = shape;
+				}
+			}
+			if (nearest != NULL) nearest->intersect(ray, color, 1);
+			image.set_pixel(i, j, color[0]*255, color[1]*255, color[2]*255);
+		}
+	}
+	printf("Image saved.\n");
+	image.save_image("out.bmp");
 }
 
 void init(){
 	//codes for initialization
 	// drawgrid=0;
 	// drawaxes=1;
-	cameraAngle=0.0;
-	cameraAngle=3 * PI / 4;
-	rot_x = 0.0;
-	rot_y = 0.0;
-	rot_z = 0.0;
-	rot_cyl = 0.0;
+	cameraAngle = 3*PI / 4;
 
     pos.x = 50, pos.y = 50, pos.z = 5;
     u.x = 0, u.y = 0, u.z = 1;
@@ -99,7 +145,7 @@ void init(){
 	glLoadIdentity();
 
 	//give PERSPECTIVE parameters
-	gluPerspective(80,	1,	1,	1000.0);
+	gluPerspective(VIEWANGLE,	1,	1,	1000.0);
 	//field of view in the Y (vertically)
 	//aspect ratio that determines the field of view in the X direction (horizontally)
 	//near distance
@@ -110,64 +156,46 @@ void keyboardListener(unsigned char key, int x,int y){
 	switch(key){
 		case '1':
 			cameraAngle = -0.1;
-			l = l * cos(cameraAngle) + l.cross(u) * sin (cameraAngle);
-			r = l.cross(u);
+			// l = l * cos(cameraAngle) + l.cross(u) * sin (cameraAngle);
+			l = (l * cos(cameraAngle) + r * sin(cameraAngle)).norm();
+			r = (l.cross(u)).norm();
 			break;
 
         case '2':
             cameraAngle = 0.1;
-			l = l * cos(cameraAngle) + l.cross(u) * sin (cameraAngle);
-			r = l.cross(u);
+			l = (l * cos(cameraAngle) + r * sin (cameraAngle)).norm();
+			r = (l.cross(u)).norm();
             break;
         
         case '3':
             cameraAngle = 0.1;
-			l = l * cos(cameraAngle) + r.cross(l) * sin (cameraAngle);
-			u = r.cross(l);
+			l = (l * cos(cameraAngle) + u * sin (cameraAngle)).norm();
+			u = (r.cross(l)).norm();
             break;
         case '4':
 			cameraAngle = -0.1;
-			l = l * cos(cameraAngle) + r.cross(l) * sin (cameraAngle);
-			u = r.cross(l);
+			l = (l * cos(cameraAngle) + u * sin (cameraAngle)).norm();
+			u = (r.cross(l)).norm();
 			break;
 		case '5':
 			cameraAngle = -0.1;
-			u = u * cos(cameraAngle) + l.cross(u) * sin (cameraAngle);
-			r = l.cross(u);
+			u = (u * cos(cameraAngle) + r * sin (cameraAngle)).norm();
+			r = (l.cross(u)).norm();
 			break;
 		case '6':
 			cameraAngle = +0.1;
-			u = u * cos(cameraAngle) + l.cross(u) * sin (cameraAngle);
-			r = l.cross(u);
+			u = (u * cos(cameraAngle) + r * sin (cameraAngle)).norm();
+			r = (l.cross(u)).norm();
 			break;
-
-		case 'q':
-			// rotate counter-clockwise around u vector
-			if (rot_y < 60) rot_y += 10;
-			break;
-		case 'w':
-			// rotate clockwise around u vector
-			if (rot_y > -60) rot_y -= 10;
-			break;
-		case 'e':
-			// rotate counter-clockwise to open sphere
-			if (rot_x > -60) rot_x -= 10;
-			break;
-		case 'r':
-			// rotate clockwise to open sphere
-			if (rot_x < 60) rot_x += 10;
-			break;
-		case 'a':
-			if (rot_cyl < 60) rot_cyl += 10;
+		case '0':
+			printf("u=%lf, r=%lf, l=%lf\n", u.abs(), r.abs(), l.abs());
+			printf("u.l=%lf, l.r=%lf, r.u=%lf\n", u.dot(l), l.dot(r), r.dot(u));
+			u.print(); (r.cross(l)).print();
+			l.print(); (u.cross(r)).print();
+			r.print(); (l.cross(u)).print();
 			break;
 		case 's':
-			if (rot_cyl > -60) rot_cyl -= 10;
-			break;
-		case 'd':
-			if (rot_z < 60) rot_z += 10;
-			break;
-		case 'f':
-			if (rot_z > -60) rot_z -= 10;
+			capture();
 			break;
 		default:
 			break;
@@ -192,10 +220,10 @@ void specialKeyListener(int key, int x,int y){
 			break;
 
 		case GLUT_KEY_PAGE_UP:
-            pos.z += 5;
+            pos = pos + u * 2;
 			break;
 		case GLUT_KEY_PAGE_DOWN:
-            pos.z -= 5;
+            pos = pos - u * 2;
 			break;
 
 		case GLUT_KEY_INSERT:
@@ -272,6 +300,7 @@ void display(){
 	drawAxes();
 	// drawGrid();
 	for (Shape * shape : shapes) shape->draw();
+	for (Light * light : lights) light->draw();
 
 	//ADD this line in the end --- if you use double buffer (i.e. GL_DOUBLE)
 	glutSwapBuffers();
@@ -291,6 +320,8 @@ void loadData(bool print = false)
 	fin >> depth >> dim;
 
 	Shape * floor = new Floor(1000, 20);
+	floor->setCoEfficients(0.2, 0.2, 0.2, 0.3);
+	floor->setShine(5);
 	shapes.push_back(floor);
 
 	int objCount;
@@ -388,11 +419,11 @@ int main(int argc, char **argv){
 	loadData();
 
 	glutInit(&argc,argv);
-	glutInitWindowSize(500, 500);
+	glutInitWindowSize(WIN_WIDTH, WIN_HEIGHT);
 	glutInitWindowPosition(0, 0);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);	//Depth, Double buffer, RGB color
 
-	glutCreateWindow("My OpenGL Program");
+	glutCreateWindow("OpnGL Ray Tracing");
 
 	init();
 
@@ -406,6 +437,8 @@ int main(int argc, char **argv){
 	glutMouseFunc(mouseListener);
 
 	glutMainLoop();		//The main loop of OpenGL
+
+	clearMemory();
 
 	return 0;
 }

@@ -20,6 +20,7 @@ class GeneralShape : public Shape
         void setSurfaceCoeff(double coeff, char coeffLabel);
         double getSurfaceCoeff(int index);
         double getSurfaceCoeff(char coeffLabel);
+        double intersect(Ray& ray, double col[], int level);
         void print(int precision = 2);
         ~GeneralShape();
 };

@@ -1,5 +1,6 @@
 #include "floor.hpp"
 #include <cstdio>
+#include <cmath>
 #include <GL/glut.h>
 
 Floor::Floor(double floorWidth, double tileWidth)
@@ -48,6 +49,47 @@ void Floor::setTileWidth(double tileWidth)
 double Floor::getTileWidth()
 {
     return length;
+}
+
+double Floor::intersect(Ray& ray, double col[], int level)
+{
+    Vector3D o(0, 0, 0);
+    Vector3D n(0, 0, 1);
+
+    double t = -1;
+    double denominator = ray.getDirection().dot(n);
+
+    if (abs(denominator) > 0.000001) 
+    {
+        Vector3D ro = o - ray.getStart();
+        t = ro.dot(n) / denominator;
+    }
+
+    if (t > 0 && level > 0)
+    {
+
+        Vector3D intersectionPoint = ray.getStart() + ray.getDirection() * t;
+        intersectionPoint.z = 0;
+
+        if (intersectionPoint.x >= reference_point.x &&
+            intersectionPoint.x <= -reference_point.x &&
+            intersectionPoint.y >= reference_point.y &&
+            intersectionPoint.y <= -reference_point.y)
+        {
+            // take the floor
+            int row = floor((intersectionPoint.x - reference_point.x) / getTileWidth());
+            int col = floor((intersectionPoint.y - reference_point.y) / getTileWidth());
+
+            if ((row + col) % 2) this->setColor(0.1, 0.1, 0.1);
+            else this->setColor(0.9, 0.9, 0.9);
+        }
+        else return -1;
+
+        Vector3D& normalAtPoint = n;
+        illuminate(ray, col, level, intersectionPoint, normalAtPoint);
+
+    }
+    return t;
 }
 
 void Floor::print(int precision)

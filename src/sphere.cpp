@@ -21,6 +21,8 @@ void Sphere::draw()
     double radius = length;
     int stacks = radius * 2;
     int slices = radius * 2;
+    if (stacks < 10) stacks = 10;
+    if (slices < 10) slices = 10;
 
     Vector3D points[stacks + 1][slices + 1];
 
@@ -47,19 +49,45 @@ void Sphere::draw()
 		{
 			glBegin(GL_QUADS);
             {    
-				glVertex3f(points[i][j].x,points[i][j].y,points[i][j].z + radius);
-				glVertex3f(points[i][j+1].x,points[i][j+1].y,points[i][j+1].z + radius);
-				glVertex3f(points[i+1][j+1].x,points[i+1][j+1].y,points[i+1][j+1].z + radius);
-				glVertex3f(points[i+1][j].x,points[i+1][j].y,points[i+1][j].z + radius);
+				glVertex3f(points[i][j].x,points[i][j].y,points[i][j].z + reference_point.z);
+				glVertex3f(points[i][j+1].x,points[i][j+1].y,points[i][j+1].z + reference_point.z);
+				glVertex3f(points[i+1][j+1].x,points[i+1][j+1].y,points[i+1][j+1].z + reference_point.z);
+				glVertex3f(points[i+1][j].x,points[i+1][j].y,points[i+1][j].z + reference_point.z);
 					
-                glVertex3f(points[i][j].x,points[i][j].y,-points[i][j].z + radius);
-				glVertex3f(points[i][j+1].x,points[i][j+1].y,-points[i][j+1].z + radius);
-				glVertex3f(points[i+1][j+1].x,points[i+1][j+1].y,-points[i+1][j+1].z + radius);
-				glVertex3f(points[i+1][j].x,points[i+1][j].y,-points[i+1][j].z + radius);	
+                glVertex3f(points[i][j].x,points[i][j].y,-points[i][j].z + reference_point.z);
+				glVertex3f(points[i][j+1].x,points[i][j+1].y,-points[i][j+1].z + reference_point.z);
+				glVertex3f(points[i+1][j+1].x,points[i+1][j+1].y,-points[i+1][j+1].z + reference_point.z);
+				glVertex3f(points[i+1][j].x,points[i+1][j].y,-points[i+1][j].z + reference_point.z);	
 			}
             glEnd();
 		}
 	}
+}
+
+double Sphere::intersect(Ray& ray, double col[], int level)
+{
+    Vector3D CA = ray.getStart() - getCenter();
+    Vector3D& B = ray.getDirection();
+    double r = getRadius();
+
+    double a = B.dot(B);
+    double b = 2 * B.dot(CA);
+    double c = (CA).dot(CA) - r * r;
+
+    double det = b*b - 4*a*c;
+
+    double t = -1;
+    if (det >= 0) t = (-b - sqrt(det)) / (2*a);
+    if (t < 0) t = -1;
+
+    if (t > 0 && level > 0)
+    {
+        Vector3D intersectionPoint = ray.getStart() + ray.getDirection() * t;
+        Vector3D normalAtPoint = (intersectionPoint - getCenter()).norm();
+        illuminate(ray, col, level, intersectionPoint, normalAtPoint);
+    }
+
+    return t;
 }
 
 void Sphere::setRadius(double radius)

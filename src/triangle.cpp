@@ -73,6 +73,49 @@ Vector3D& Triangle::getPoint(int i)
     return points[i];
 }
 
+double determinant(double a1, double b1, double c1,
+                   double a2, double b2, double c2,
+                   double a3, double b3, double c3)
+{
+   return a1 * (b2*c3 - b3*c2) - b1 * (a2*c3 - a3*c2) + c1 * (a2*b3 - a3*b2); 
+}
+
+double Triangle::intersect(Ray& ray, double col[], int level)
+{
+    Vector3D AB = points[1] - points[0];
+    Vector3D AC = points[2] - points[0];
+
+    Vector3D h = ray.getDirection().cross(AC);
+
+    double a = AB.dot(h);
+
+    
+    if (a > -0.00001 && a < 0.00001) return -1.0;
+    double f = 1 / a;
+    
+    Vector3D s = ray.getStart() - points[0];
+    
+    double u = f * h.dot(s);
+    if (u < 0.0 || u > 1.0)
+        return -1.0;
+    
+    Vector3D q = s.cross(AB);
+    double v = f * ray.getDirection().dot(q);
+
+    if (v < 0.0 || (u + v) > 1.0)
+        return -1.0;
+    
+    double t = f * q.dot(AC);
+
+    if (t > 0 && level > 0)
+    {
+        Vector3D intersectionPoint = ray.getStart() + ray.getDirection() * t;
+        Vector3D normalAtPoint = (AB.cross(AC)).norm();
+        illuminate(ray, col, level, intersectionPoint, normalAtPoint);        
+    }
+    return t;
+}
+
 void Triangle::print(int precision)
 {
     printf("%s", type());

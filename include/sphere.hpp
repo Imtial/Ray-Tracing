@@ -13,6 +13,7 @@ class Sphere : public Shape
         double getRadius();
         void setCenter(Vector3D& center);
         Vector3D& getCenter();
+        double intersect(Ray& ray, double col[], int level);
         void draw();
         void print(int precision = 2);
         ~Sphere();

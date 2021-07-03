@@ -10,12 +10,14 @@ public:
     Vector3D(double x, double y, double z);
 	void setXYZ(double x, double y, double z);
     double dist(Vector3D &rhs);
+    double abs();
     Vector3D norm();
-    double dot(Vector3D &rhs);
-    Vector3D cross(Vector3D &rhs);
-    Vector3D operator+(Vector3D rhs);
-    Vector3D operator-(Vector3D rhs);
+    double dot(const Vector3D &rhs);
+    Vector3D cross(const Vector3D &rhs);
+    Vector3D operator+(const Vector3D &rhs);
+    Vector3D operator-(const Vector3D &rhs);
     Vector3D operator*(double n);
+    bool operator==(Vector3D& rhs);
 	void print(int precision = 7);
 };
 

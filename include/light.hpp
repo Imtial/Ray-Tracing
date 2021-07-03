@@ -15,6 +15,7 @@ class Light
         Vector3D& getPosition();
         void setColor(double r, double g, double b);
         double (&getColor())[3];
+        void draw();
         void print(int precision = 2);
         ~Light();
 };
