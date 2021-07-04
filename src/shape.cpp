@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstdio>
 #include <cmath>
+#include <algorithm>
 
 extern std::vector<Shape*> shapes;
 extern std::vector<Light*> lights;
@@ -62,17 +63,19 @@ void Shape::illuminate(Ray& ray, double col[], int level,
         if (!isObscured)
         {
             double lambert = normalAtIntersection.dot(lightRay.getDirection());
-            if (lambert < 0) lambert = 0;
             Vector3D rayR = lightRay.getDirection() - normalAtIntersection * (2 * lambert);
-            double phong = rayR.dot(ray.getDirection());
-            if (phong < 0) phong = 0;
+            double phongPowered = std::pow(-rayR.dot(ray.getDirection()), shine);
+            
             for (int i = 0; i < 3; i++)
-                pointColor[i] += light->getColor()[i] * color[i] * coEfficients[1] * lambert
-                                + light->getColor()[i] * coEfficients[2] * pow(phong, shine);
+            {
+                pointColor[i] += light->getColor()[i] * color[i] * coEfficients[1] * std::max(lambert, 0.0)
+                                + light->getColor()[i] * coEfficients[2] * std::max(phongPowered, 0.0);
+            }
         }
     }
     for (int i = 0; i < 3; i++) 
         col[i] = pointColor[i];
+    
 
     if (level < 5)
     {

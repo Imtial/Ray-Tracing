@@ -27,17 +27,17 @@ char* GeneralShape::type()
 
 void GeneralShape::draw()
 {
-    double a = height;
-    Vector3D &p = reference_point;
-    glColor3f(color[0], color[1], color[2]);
-    glBegin(GL_QUADS);
-    {
-        glVertex3f(p.x +a, p.y +a, p.z -a);
-        glVertex3f(p.x +a, p.y -a, p.z -a);
-        glVertex3f(p.x -a, p.y -a, p.z -a);
-        glVertex3f(p.x -a, p.y +a, p.z -a);
-    }
-    glEnd();
+    // double a = height;
+    // Vector3D &p = reference_point;
+    // glColor3f(color[0], color[1], color[2]);
+    // glBegin(GL_QUADS);
+    // {
+    //     glVertex3f(p.x +a, p.y +a, p.z -a);
+    //     glVertex3f(p.x +a, p.y -a, p.z -a);
+    //     glVertex3f(p.x -a, p.y -a, p.z -a);
+    //     glVertex3f(p.x -a, p.y +a, p.z -a);
+    // }
+    // glEnd();
 }
 
 void GeneralShape::setSurfaceCoeffs(double a, double b, double c, double d, double e,
@@ -169,128 +169,7 @@ double GeneralShape::intersect(Ray& ray, double col[], int level)
                 t = -1;
         }
     }
-
-/* 
-    double xo = ray.getStart().x, yo = ray.getStart().y, zo = ray.getStart().z;
-    double xd = ray.getDirection().x, yd = ray.getDirection().y, zd = ray.getDirection().z;
-
-    double a = A*xd*xd + B*yd*yd + C*zd*zd + D*xd*yd + E*xd*zd + F*yd*zd;
-    double b = 2 * (A*xo*xd + B*yo*yd + C*zo*zd) + D * (xo*yd + yo*xd) + E * (xo*zd + zo*xd)
-                + F * (yo*zd + zo*yd) + G*xd + H*yd + I*zd;
-    double c = A*xo*xo + B*yo*yo + C*zo*zo + D*xo*yo + E*xo*zo + F*yo*zo + G*xo + H*yo + I*zo + J;
-
-    double discrim = b*b - 4*a*c;
-
-    double t1 = -1, t2 = -1, t = -1;
-
-    if (a < eps && a > -eps) t = -c / b;
-
-    if (discrim >= 0)
-    {
-        t1 = (-b - sqrt(discrim)) / (2*a);
-        t2 = (-b + sqrt(discrim)) / (2*a);
-
-        if(t2 >= 0 && t1 < 0)
-        {
-            Vector3D ip2 = ray.getStart() + ray.getDirection() * t2;
-            Vector3D ip2Dist = ip2 - reference_point;
-            
-            if(length > 0)
-            {
-                if(abs(ip2Dist.x) > length)
-                    return -1.0;
-
-                else
-                {
-                    t = t2;
-                }
-            }
-
-            if(width > 0)
-            {
-                if(abs(ip2Dist.y) > width)
-                    return -1.0;
-
-                else
-                {
-                    t = t2;
-                }
-            }
-
-            if(height > 0)
-            {
-                if(abs(ip2Dist.z) > height)
-                    return -1.0;
-
-                else
-                {
-                    t = t2;
-                }
-            }
-        }
-
-        else if(t1 >= 0 && t2 < 0)
-        {
-            t = t1;
-        }
-
-        else if(t1 >= 0 && t2 >= 0)
-        {
-            Vector3D ip1 = ray.getStart() + ray.getDirection() * t1;
-            Vector3D ip2 = ray.getStart() + ray.getDirection() * t2;
-
-            Vector3D ip1Dist = ip1 - reference_point;
-            Vector3D ip2Dist = ip2 - reference_point;
-            
-            if(length > 0)
-            {
-                if(abs(ip1Dist.x) > length && abs(ip2Dist.x) > length)
-                    return -1.0;
-
-                if(abs(ip1Dist.x) > length)
-                    t = t2;
-
-                else if(abs(ip2Dist.x) > length)
-                    t = t1;
-
-                else
-                    t = std::min(t1, t2);
-            }
-
-            if(width > 0)
-            {
-                if(abs(ip1Dist.y) > width && abs(ip2Dist.y) > width)
-                    return -1.0;
-
-                if(abs(ip1Dist.y) > width)
-                    t = t2;
-
-                else if(abs(ip2Dist.y) > width)
-                    t = t1;
-
-                else
-                    t = std::min(t1, t2);
-            }
-
-            if(height > 0)
-            {
-                if(abs(ip1Dist.z) > height && abs(ip2Dist.z) > height)
-                    return -1.0;
-
-                if(abs(ip1Dist.z) > height)
-                    t = t2;
-
-                else if(abs(ip2Dist.z) > height)
-                    t = t1;
-
-                else
-                    t = std::min(t1, t2);
-            }
-
-        }
-
-    } */
-
+    
     if (t > 0 && level > 0)
     {
         Vector3D intersectionPoint = ray.getStart() + ray.getDirection() * t;

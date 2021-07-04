@@ -1,9 +1,16 @@
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+   //define something for Windows (32-bit and 64-bit, this part is common)
+   #include <windows.h>
+#elif __APPLE__
+    #include <GLUT/glut.h>
+#else
+	#include <GL/glut.h>
+#endif
 #include <iostream>
 #include <fstream>
 #include <cmath>
 #include <string>
 #include <vector>
-#include <GL/glut.h>
 #include "vector3D.hpp"
 #include "shape.hpp"
 #include "floor.hpp"
@@ -114,6 +121,8 @@ void capture()
 				}
 			}
 			if (nearest != NULL) nearest->intersect(ray, color, 1);
+			for (int i = 0; i < 3; i++)
+				if (color[i] > 1) color[i] = 1;
 			image.set_pixel(i, j, color[0]*255, color[1]*255, color[2]*255);
 		}
 	}
@@ -316,11 +325,11 @@ void clearMemory()
 
 void loadData(bool print = false)
 {
-	ifstream fin("scene.txt");
+	ifstream fin("scene-test.txt");
 	fin >> depth >> dim;
 
 	Shape * floor = new Floor(1000, 20);
-	floor->setCoEfficients(0.2, 0.2, 0.2, 0.3);
+	floor->setCoEfficients(0.3, 0.3, 0.2, 0.3);
 	floor->setShine(5);
 	shapes.push_back(floor);
 
