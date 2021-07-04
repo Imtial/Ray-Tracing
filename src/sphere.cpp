@@ -2,6 +2,7 @@
 #include <GL/glut.h>
 #include <cstdio>
 #include <cmath>
+#include <algorithm>
 
 #define PI  3.141592653589793
 
@@ -76,9 +77,21 @@ double Sphere::intersect(Ray& ray, double col[], int level)
 
     double det = b*b - 4*a*c;
 
-    double t = -1;
-    if (det >= 0) t = (-b - sqrt(det)) / (2*a);
-    if (t < 0) t = -1;
+    // double t = -1;
+    // if (det >= 0) t = (-b - sqrt(det)) / (2*a);
+    // if (t < 0) t = -1;
+
+    double t = -1, t1 = -1, t2 = -1;
+
+    if (det >= 0)
+    {
+        t1 = (-b - sqrt(det)) / (2*a);
+        t2 = (-b + sqrt(det)) / (2*a);
+        if (t1 > 0.0)
+            t = t1;
+        else if (t2 > 0.0)
+            t = t2;
+    }
 
     if (t > 0 && level > 0)
     {
